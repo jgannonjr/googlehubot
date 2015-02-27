@@ -62,29 +62,17 @@ module.exports = (robot) ->
           msg.send decode striptags elem.html()
           sentAnswer = true
 
-        # Test for a YouTube embed.
-        song_block = $('div.kp-blk.knowledge-block__song-block')
-        video_block = $('div.kp-blk.knowledge-block__video-nav-block')
-        if !sentAnswer and (song_block.length > 0 or video_block.length > 0)
-          # Copy and paste
-          robot.http("http://gdata.youtube.com/feeds/api/videos")
-            .query({
-              orderBy: "relevance"
-              'max-results': 15
-              alt: 'json'
-              q: query
-            })
-            .get() (err, res, body) ->
-              videos = JSON.parse(body)
-              videos = videos.feed.entry
+        # Test for a video block YouTube video.
+        elem = $('div.knowledge-block__video-nav-block cite')
+        if !sentAnswer and elem.length > 0
+          msg.send "http://#{elem.text()}"
+          sentAnswer = true
 
-              unless videos?
-                msg.send "No video results for \"#{query}\""
-
-              video = msg.random videos
-              video.link.forEach (link) ->
-                if link.rel is "alternate" and link.type is "text/html"
-                  msg.send link.href
+        # Test for a song block YouTube video.
+        elem = $('div.knowledge-block__song-block cite')
+        if !sentAnswer and elem.length > 0
+          msg.send "http://#{elem.text()}"
+          sentAnswer = true
 
         # Also send the search url.
         msg.send searchUrl
