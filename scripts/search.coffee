@@ -12,4 +12,4 @@ module.exports = (robot) ->
 
   robot.respond /(.*)/i, (msg) ->
     query = msg.match[1].split(' ').join('+')
-    msg.reply "https://www.google.com/search?q=#{query}"
+    msg.send "https://www.google.com/search?q=#{query}"
