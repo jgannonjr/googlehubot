@@ -61,6 +61,11 @@ module.exports = (robot) ->
         if !text and elem.length > 0
           text = decode striptags elem.html()
 
+        # Try for maps text.
+        elem = $('span._Abe')
+        if !text and elem.length > 0
+          text = decode striptags elem.html()
+
         # Test for a video block YouTube video.
         elem = $('div.knowledge-block__video-nav-block cite')
         if !video and elem.length > 0
@@ -75,6 +80,11 @@ module.exports = (robot) ->
         elem = $('a.bia.uh_rl')
         if !image and elem.length > 0
           image = url.parse(elem.attr('href'), true).query.imgurl
+
+        # Try for maps image
+        elem = $('img.lu_vs.rremi')
+        if !image and elem.length > 0
+          image = "http://www.google.com/#{elem.attr('data-bsrc')}"
 
         # Send everything
         if video
