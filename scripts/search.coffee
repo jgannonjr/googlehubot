@@ -28,51 +28,50 @@ module.exports = (robot) ->
       .header('User-Agent', kChromeUserAgent)  # Used to return knowledge panels
       .get() (err, res, body) ->
         $ = cheerio.load body
-        sentAnswer = false
+
+        text = ''
+        video = ''
 
         # Try for an answer panel.
         # Using the ._eF class is a hack, the class could change
         elem = $('._eF')
-        if elem.length > 0
-          msg.send decode striptags elem.html()
-          sentAnswer = true
+        if !text and elem.length > 0
+          text = decode striptags elem.html()
 
         # Try for an vk answer.
         elem = $('div.vk_ans')
-        if !sentAnswer and elem.length > 0
-          msg.send decode striptags elem.html()
-          sentAnswer = true
+        if !text and elem.length > 0
+          text = decode striptags elem.html()
 
         # Try for conversion answer.
         elem = $('#rhs_div input.ucw_data')
-        if !sentAnswer and elem.length > 0
-          msg.send elem.attr 'value'
-          sentAnswer = true
+        if !text and elem.length > 0
+          text = elem.attr 'value'
 
         # Try for a top search result panel.
         # Using the ._Tgc class is a hack, the class could change
         elem = $('span._Tgc')
-        if !sentAnswer and elem.length > 0
-          msg.send decode striptags elem.html()
-          sentAnswer = true
+        if !text and elem.length > 0
+          text = decode striptags elem.html()
 
         # Try for a knowledge panel.
         elem = $('div.kno-rdesc span')
-        if !sentAnswer and elem.length > 0
-          msg.send decode striptags elem.html()
-          sentAnswer = true
+        if !text and elem.length > 0
+          text = decode striptags elem.html()
 
         # Test for a video block YouTube video.
         elem = $('div.knowledge-block__video-nav-block cite')
-        if !sentAnswer and elem.length > 0
-          msg.send "http://#{elem.text()}"
-          sentAnswer = true
+        if !video and elem.length > 0
+          video = "http://#{elem.text()}"
 
         # Test for a song block YouTube video.
         elem = $('div.knowledge-block__song-block cite')
-        if !sentAnswer and elem.length > 0
-          msg.send "http://#{elem.text()}"
-          sentAnswer = true
+        if !video and elem.length > 0
+          video = "http://#{elem.text()}"
 
-        # Also send the search url.
+        # Send everything
+        if video
+          msg.send video
+        if text
+          msg.send text
         msg.send searchUrl
