@@ -31,15 +31,21 @@ module.exports = (robot) ->
         sentAnswer = false
 
         # Try for an answer panel.
-        # Using the ._Tgc class is a hack, the class could change
+        # Using the ._eF class is a hack, the class could change
         elem = $('._eF')
         if elem.length > 0
           msg.send decode striptags elem.html()
           sentAnswer = true
 
+        # Try for an vk answer.
+        elem = $('div.vk_ans')
+        if !sentAnswer and elem.length > 0
+          msg.send decode striptags elem.html()
+          sentAnswer = true
+
         # Try for conversion answer.
         elem = $('#rhs_div input.ucw_data')
-        if elem.length > 0
+        if !sentAnswer and elem.length > 0
           msg.send elem.attr 'value'
           sentAnswer = true
 
