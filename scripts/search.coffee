@@ -16,4 +16,4 @@ module.exports = (robot) ->
       .get() (err, res, body) ->
         cheerio = require('cheerio')
         $ = cheerio.load(body)
-        msg.send body # $('.kp-blk').html() 
+        msg.send $('ol').html() 
