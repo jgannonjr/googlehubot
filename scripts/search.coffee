@@ -12,4 +12,8 @@ module.exports = (robot) ->
 
   robot.respond /(.*)/i, (msg) ->
     query = msg.match[1].split(' ').join('+')
-    msg.send "https://www.google.com/search?q=#{query}"
+    msg.http("https://www.google.com/search?q=#{query}")
+      .get() (err, res, body) ->
+        cheerio = require('cheerio')
+        $ = cheerio.load(body)
+        msg.send body # $('.kp-blk').html() 
