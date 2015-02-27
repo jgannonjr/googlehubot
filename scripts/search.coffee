@@ -38,6 +38,11 @@ getText = ($) ->
   if elem.length > 0
     return decode striptags elem.html()
 
+  # Try for a math answer.
+  elem = $('span#cwos')
+  if elem.length > 0
+    return elem.text()
+
   # Try for conversion answer.
   elem = $('#rhs_div input.ucw_data')
   if elem.length > 0
@@ -87,7 +92,7 @@ getVideo = ($) ->
 module.exports = (robot) ->
 
   robot.respond /(.*)/i, (msg) ->
-    query = msg.match[1].split(' ').join('+')
+    query = encodeURIComponent(msg.match[1])
     searchUrl = "https://www.google.com/search?q=#{query}"
     msg.http(searchUrl)
       .header('User-Agent', kChromeUserAgent)  # Used to return knowledge panels
