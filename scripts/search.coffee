@@ -37,6 +37,12 @@ module.exports = (robot) ->
           msg.send decode striptags elem.html()
           sentAnswer = true
 
+        # Try for conversion answer.
+        elem = $('#rhs_div input.ucw_data')
+        if elem.length > 0
+          msg.send elem.attr 'value'
+          sentAnswer = true
+
         # Try for a top search result panel.
         # Using the ._Tgc class is a hack, the class could change
         elem = $('span._Tgc')
