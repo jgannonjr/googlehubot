@@ -20,6 +20,70 @@ striptags = (str) ->
   # A regex will work for simple cases.
   return str.replace(/(<([^>]+)>)/ig, '')
 
+getText = ($) ->
+  # Try for a top search result panel.
+  # Using the ._Tgc class is a hack, the class could change
+  elem = $('span._Tgc')
+  if elem.length > 0
+    return decode striptags elem.html()
+
+  # Try for an answer panel.
+  # Using the ._eF class is a hack, the class could change
+  elem = $('._eF')
+  if elem.length > 0
+    return decode striptags elem.html()
+
+  # Try for an vk answer.
+  elem = $('div.vk_ans')
+  if elem.length > 0
+    return decode striptags elem.html()
+
+  # Try for conversion answer.
+  elem = $('#rhs_div input.ucw_data')
+  if elem.length > 0
+    return elem.attr 'value'
+
+  # Try for maps text.
+  elem = $('span._Abe')
+  if elem.length > 0
+    return decode striptags elem.html()
+
+  # Try for a knowledge panel.  Should always do this last if we can't find 
+  # else more relevant anything.
+  elem = $('div.kno-rdesc span')
+  if elem.length > 0
+    return decode striptags elem.html()
+
+  return null
+
+
+getImage = ($) ->
+  # Try for image
+  elem = $('a.bia.uh_rl')
+  if elem.length > 0
+    return url.parse(elem.attr('href'), true).query.imgurl
+
+  # Try for maps image
+  elem = $('img.lu_vs.rremi')
+  if elem.length > 0
+    return "http://www.google.com/#{elem.attr('data-bsrc')}"
+
+  return null
+
+
+getVideo = ($) ->
+  # Test for a video block YouTube video.
+  elem = $('div.knowledge-block__video-nav-block cite')
+  if elem.length > 0
+    return "http://#{elem.text()}"
+
+  # Test for a song block YouTube video.
+  elem = $('div.knowledge-block__song-block cite')
+  if elem.length > 0
+    return "http://#{elem.text()}"
+
+  return null
+
 module.exports = (robot) ->
 
   robot.respond /(.*)/i, (msg) ->
@@ -30,63 +94,10 @@ module.exports = (robot) ->
       .get() (err, res, body) ->
         $ = cheerio.load body
 
-        text = null
-        image = null
-        video = null
+        text = getText($)
+        image = getImage($)
+        video = getVideo($)
 
-        # Try for an answer panel.
-        # Using the ._eF class is a hack, the class could change
-        elem = $('._eF')
-        if !text and elem.length > 0
-          text = decode striptags elem.html()
-
-        # Try for an vk answer.
-        elem = $('div.vk_ans')
-        if !text and elem.length > 0
-          text = decode striptags elem.html()
-
-        # Try for conversion answer.
-        elem = $('#rhs_div input.ucw_data')
-        if !text and elem.length > 0
-          text = elem.attr 'value'
-
-        # Try for a top search result panel.
-        # Using the ._Tgc class is a hack, the class could change
-        elem = $('span._Tgc')
-        if !text and elem.length > 0
-          text = decode striptags elem.html()
-
-        # Try for a knowledge panel.
-        elem = $('div.kno-rdesc span')
-        if !text and elem.length > 0
-          text = decode striptags elem.html()
-
-        # Try for maps text.
-        elem = $('span._Abe')
-        if !text and elem.length > 0
-          text = decode striptags elem.html()
-
-        # Test for a video block YouTube video.
-        elem = $('div.knowledge-block__video-nav-block cite')
-        if !video and elem.length > 0
-          video = "http://#{elem.text()}"
-
-        # Test for a song block YouTube video.
-        elem = $('div.knowledge-block__song-block cite')
-        if !video and elem.length > 0
-          video = "http://#{elem.text()}"
-
-        # Try for image
-        elem = $('a.bia.uh_rl')
-        if !image and elem.length > 0
-          image = url.parse(elem.attr('href'), true).query.imgurl
-
-        # Try for maps image
-        elem = $('img.lu_vs.rremi')
-        if !image and elem.length > 0
-          image = "http://www.google.com/#{elem.attr('data-bsrc')}"
-
-        # Send everything
         if video
           msg.send video
         if !video and image
