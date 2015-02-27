@@ -28,16 +28,25 @@ module.exports = (robot) ->
       .header('User-Agent', kChromeUserAgent)  # Used to return knowledge panels
       .get() (err, res, body) ->
         $ = cheerio.load body
+        sentAnswer = false
+
+        # Try for an answer panel.
+        # Using the ._Tgc class is a hack, the class could change
+        elem = $('._eF')
+        if elem.length > 0
+          msg.send decode striptags elem.html()
+          sentAnswer = true
 
         # Try for a top search result panel.
         # Using the ._Tgc class is a hack, the class could change
         elem = $('span._Tgc')
-        if elem.length > 0
+        if !sentAnswer and elem.length > 0
           msg.send decode striptags elem.html()
+          sentAnswer = true
 
         # Try for a knowledge panel.
         elem = $('div.kno-rdesc span')
-        if elem.length > 0
+        if !sentAnswer and elem.length > 0
           msg.send decode striptags elem.html()
 
         # Also send the search url.
