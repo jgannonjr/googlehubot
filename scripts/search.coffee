@@ -8,12 +8,37 @@
 #
 #   These are from the scripting documentation: https://github.com/github/hubot/blob/master/docs/scripting.md
 
+cheerio = require 'cheerio'
+decode = require 'ent/decode'
+
+kChromeUserAgent = 
+  'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,
+  like Gecko) Chrome/43.0.2313.0 Safari/537.36'
+
+striptags = (str) ->
+  # A regex will work for simple cases.
+  return str.replace(/(<([^>]+)>)/ig, '')
+
 module.exports = (robot) ->
 
   robot.respond /(.*)/i, (msg) ->
     query = msg.match[1].split(' ').join('+')
-    msg.http("https://www.google.com/search?q=#{query}")
+    searchUrl = "https://www.google.com/search?q=#{query}"
+    msg.http(searchUrl)
+      .header('User-Agent', kChromeUserAgent)  # Used to return knowledge panels
       .get() (err, res, body) ->
-        cheerio = require('cheerio')
-        $ = cheerio.load(body)
-        msg.send $('ol').html() 
+        $ = cheerio.load body
+
+        # Try for a top search result panel.
+        # Using the ._Tgc class is a hack, the class could change
+        elem = $('span._Tgc')
+        if elem.length > 0
+          msg.send decode striptags elem.html()
+
+        # Try for a knowledge panel.
+        elem = $('div.kno-rdesc span')
+        if elem.length > 0
+          msg.send decode striptags elem.html()
+
+        # Also send the search url.
+        msg.send searchUrl

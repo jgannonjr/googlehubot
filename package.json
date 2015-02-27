@@ -5,6 +5,7 @@
   "author": "johnnygannon@google.com",
   "description": "A simple helpful robot for your Company",
   "dependencies": {
+    "ent": "2.2.0",
     "hubot": "^2.11.1",
     "hubot-diagnostics": "0.0.1",
     "hubot-google-images": "^0.1.3",
