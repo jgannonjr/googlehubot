@@ -10,6 +10,7 @@
 
 cheerio = require 'cheerio'
 decode = require 'ent/decode'
+url = require 'url'
 
 kChromeUserAgent = 
   'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_5) AppleWebKit/537.36 (KHTML,
@@ -29,8 +30,9 @@ module.exports = (robot) ->
       .get() (err, res, body) ->
         $ = cheerio.load body
 
-        text = ''
-        video = ''
+        text = null
+        image = null
+        video = null
 
         # Try for an answer panel.
         # Using the ._eF class is a hack, the class could change
@@ -69,9 +71,16 @@ module.exports = (robot) ->
         if !video and elem.length > 0
           video = "http://#{elem.text()}"
 
+        # Try for image
+        elem = $('a.bia.uh_rl')
+        if !image and elem.length > 0
+          image = url.parse(elem.attr('href'), true).query.imgurl
+
         # Send everything
         if video
           msg.send video
+        if !video and image
+          msg.send image
         if text
           msg.send text
         msg.send searchUrl
